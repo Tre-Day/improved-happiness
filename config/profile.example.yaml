@@ -1,0 +1,33 @@
+# profile.example.yaml — copy to profile.yaml or profiles/<name>.yaml and fill in
+# No personal data is committed — this file is the template for GitHub.
+
+name: "Your Name"
+headline: "Your headline — e.g. Senior Product Designer"
+summary: |
+  Who you are, what you want. Scorers and LLM rerank use this.
+years_exp: 8
+skills:
+  - Design Systems
+  - User Research
+
+# Capabilities — how the scorers match you (all optional, all editable in The Couch)
+target_roles:
+  top:
+    - senior product designer
+    - staff designer
+  mid:
+    - product designer
+    - ux designer
+  entry:
+    - junior designer
+keywords:
+  include:
+    - design system
+    - figma
+    - research
+  exclude:
+    - sales manager
+    - registered nurse
+remote_keywords:
+  - remote
+  - work from home

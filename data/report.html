@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>JobBot — Applied Report</title>
+<style>
+:root{--bg:#0f0f1a;--surface:#161627;--border:#2e2e50;--accent:#6366f1;--green:#22c55e;--yellow:#eab308;--red:#ef4444;--text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;--font:system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13px;padding:20px}
+h1{font-size:18px;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+th{color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left}
+td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+a{color:#818cf8;text-decoration:none}.badge{padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.b-green{background:rgba(34,197,94,.15);color:var(--green)}.b-yellow{background:rgba(234,179,8,.15);color:var(--yellow)}
+.b-red{background:rgba(239,68,68,.15);color:var(--red)}.b-gray{background:rgba(100,116,139,.15);color:var(--text3)}
+.stats{display:flex;gap:16px;margin:12px 0}.stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 20px;flex:1}
+.stat strong{font-size:22px;display:block;color:#818cf8}
+input{width:100%;margin:8px 0;background:var(--surface);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px 10px}
+</style>
+</head>
+<body>
+<h1>JobBot — Applied Report</h1>
+<input id="q" placeholder="Search title or company..."/>
+<div class="stats">
+  <div class="stat"><strong id="sTotal">—</strong> Discovered</div>
+  <div class="stat"><strong id="sApplied">—</strong> Applied</div>
+  <div class="stat"><strong id="sAvg">—</strong> Avg Score</div>
+</div>
+<div style="overflow-x:auto">
+<table><thead><tr><th style="width:50px">Score</th><th>Title</th><th>Company</th><th>Location</th><th>Board</th><th>Status</th><th>Reason</th></tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+<script>
+const CSV = 'tracker.csv'
+const scoreColor = s => s>=70?'var(--green)':s>=50?'var(--yellow)':'var(--text3)'
+const badge = s => s==='applied'?'b-green':['failed','blocked','captcha'].includes(s)?'b-red':s==='dry_run'?'b-gray':'b-gray'
+let rows=[]
+fetch(CSV).then(r=>r.text()).then(t=>{
+  const lines=t.split('\n').filter(l=>l.trim())
+  if(lines.length<2)return
+  const H=lines[0].split(',').map(h=>h.replace(/"/g,'').trim())
+  rows=lines.slice(1).map(l=>{
+    const vals=l.split(',');const r={};H.forEach((h,i)=>r[h]=(vals[i]||'').replace(/"/g,'').trim());return r
+  })
+  const total=rows.length, applied=rows.filter(r=>r.apply_status==='applied').length
+  const scores=rows.map(r=>parseInt(r.score||0)).filter(n=>!isNaN(n)), avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0
+  document.getElementById('sTotal').textContent=total;document.getElementById('sApplied').textContent=applied;document.getElementById('sAvg').textContent=avg
+  render(rows)
+})
+function render(list){
+  const tb=document.getElementById('tbody')
+  tb.innerHTML=list.slice(0,500).map(r=>{
+    const sc=parseInt(r.score||0), url=r.URL||r.Link||'#', title=(r['Job Title']||r.Title||'?').slice(0,80), st=r.apply_status||r.Status||'discovered', board=r.Platform||r.Source||'?'
+    return `<tr><td style="color:${scoreColor(sc)};font-weight:700">${sc}</td><td><a href="${url}" target="_blank">${title}</a></td><td>${r.Company||'?'}</td><td>${r.Location||'?'}</td><td>${board}</td><td><span class="badge ${badge(st)}">${st}</span></td><td style="font-size:11px;color:var(--text3)">${(r.reasons||'').slice(0,80)}</td></tr>`
+  }).join('')
+}
+document.getElementById('q').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase()
+  render(!q?rows:rows.filter(r=>((r['Job Title']||r.Title||'')+' '+(r.Company||'')).toLowerCase().includes(q)))
+})
+</script>
+</body>
+</html>

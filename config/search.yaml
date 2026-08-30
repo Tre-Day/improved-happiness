@@ -1,0 +1,88 @@
+---
+# search.yaml — job search configuration
+# Boards: id matches ats_adapter BOARD_JOBS_URLS keys
+boards:
+  - id: linkedin
+    label: LinkedIn
+    enabled: true
+  - id: indeed
+    label: Indeed
+    enabled: true
+  - id: greenhouse
+    label: Greenhouse
+    enabled: true
+    domain: ""
+  - id: lever
+    label: Lever
+    enabled: true
+    domain: ""
+  - id: ashby
+    label: Ashby
+    enabled: true
+    domain: ""
+  - id: workday
+    label: Workday
+    enabled: true
+    domain: ""
+  - id: smartrecruiters
+    label: SmartRecruiters
+    enabled: true
+    domain: ""
+  - id: workable
+    label: Workable
+    enabled: true
+    domain: ""
+  - id: glassdoor
+    label: Glassdoor
+    enabled: true
+  - id: google
+    label: Google Jobs
+    enabled: true
+  - id: ziprecruiter
+    label: ZipRecruiter
+    enabled: true
+  - id: naukri
+    label: Naukri
+    enabled: false
+    domain: ""
+  - id: bayt
+    label: Bayt
+    enabled: false
+    domain: ""
+
+keywords:
+  # Example — replace with your own hunt. These are loaded into the scorer.
+  # The Couch game picker overwrites this list when you pick a game.
+  - supply chain
+  - procurement
+  - sourcing
+  - logistics
+  - purchasing
+  - vendor management
+  - category manager
+  - strategic sourcing
+  - operations manager
+  - demand planning
+  - inventory
+  - materials management
+  - freight
+  - distribution
+
+locations:
+  # Example — add your own via Search tab. Bonus adds to score for jobs in that location.
+  - id: "1"
+    label: Remote
+    query: Remote
+    remote: true
+    bonus: 10
+  - id: "2"
+    label: Your City
+    query: Your City
+    remote: false
+    bonus: 8
+
+maxApply: 20
+maxPages: 4
+delayMs: 800
+scoreThreshold: 50
+dryRun: true
