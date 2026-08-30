@@ -15,6 +15,7 @@ const BOARDS: Board[] = [
   { id: 'workday',         label: 'Workday',        enabled: true },
   { id: 'smartrecruiters', label: 'SmartRecruiters',enabled: true },
   { id: 'workable',        label: 'Workable',       enabled: true },
+  { id: 'flexjobs',        label: 'FlexJobs',       enabled: false },
   { id: 'naukri',          label: 'Naukri',         enabled: false },
   { id: 'bayt',            label: 'Bayt',            enabled: false },
 ]

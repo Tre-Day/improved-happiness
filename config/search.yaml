@@ -41,6 +41,10 @@ boards:
   - id: ziprecruiter
     label: ZipRecruiter
     enabled: true
+  - id: flexjobs
+    label: FlexJobs
+    enabled: false
+    domain: flexjobs.com
   - id: naukri
     label: Naukri
     enabled: false
