@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # improved-happiness — JobBot Desktop
 
 > **Headless auto-apply job bot** — Electron desktop EXE with Playwright bundled Chromium, per-profile per-site resumes, DPAPI vault, and LaziBot on The Couch.
@@ -132,3 +133,6 @@ High in the idle peaks, the Monastery of Laziness taught one principle: *do the 
 ## License
 
 MIT — `LICENSE` — Tre-Day. See `LICENSE` file.
+=======
+# improved-happiness
+>>>>>>> 7ce8c4b6fa4ba9e711a18ae334f3a6affb174f7c
