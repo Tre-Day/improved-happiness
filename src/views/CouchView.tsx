@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react'
 import LaziBot from '../components/LaziBot'
+import { IconPackage, IconTarget, IconHandshake, IconChart, IconTruck, IconPuzzle } from '../components/Icons'
 
 type CouchProps = { onGo: (view: string) => void }
 
 const GAMES = [
-  { id: 'supply-chain', title: 'Supply Chain Conquest', desc: 'Procurement · Sourcing · Logistics', icon: '📦', accent: '#0a66c2', picks: ['supply chain', 'procurement', 'sourcing', 'logistics', 'purchasing'] },
-  { id: 'ops-command', title: 'Ops Command', desc: 'Operations Manager / Director', icon: '🎯', accent: '#057642', picks: ['operations manager', 'operations director', 'plant manager', 'production manager'] },
-  { id: 'vendor-guild', title: 'Vendor Guild', desc: 'Category · Vendor · Contracts', icon: '🤝', accent: '#7c3aed', picks: ['category manager', 'vendor manager', 'contracts manager', 'strategic sourcing'] },
-  { id: 'planning-arc', title: 'Planning Arc', desc: 'Demand · Inventory · Materials', icon: '📈', accent: '#b24020', picks: ['demand planning', 'inventory', 'materials management', 'supply planner', 'S&OP'] },
-  { id: 'freight-run', title: 'Freight Run', desc: 'Freight · Distribution · Warehouse', icon: '🚚', accent: '#0e7490', picks: ['freight', 'distribution', 'warehouse', 'fulfillment'] },
-  { id: 'erp-craft', title: 'ERP Craft', desc: 'SAP · Oracle · Workday', icon: '🧩', accent: '#1d4ed8', picks: ['erp', 'sap', 'oracle', 'workday', 'coupa', 'ariba'] },
+  { id: 'supply-chain', title: 'Supply Chain Conquest', desc: 'Procurement · Sourcing · Logistics', icon: <IconPackage size={20} />, accent: '#0a66c2', picks: ['supply chain', 'procurement', 'sourcing', 'logistics', 'purchasing'] },
+  { id: 'ops-command', title: 'Ops Command', desc: 'Operations Manager / Director', icon: <IconTarget size={20} />, accent: '#057642', picks: ['operations manager', 'operations director', 'plant manager', 'production manager'] },
+  { id: 'vendor-guild', title: 'Vendor Guild', desc: 'Category · Vendor · Contracts', icon: <IconHandshake size={20} />, accent: '#7c3aed', picks: ['category manager', 'vendor manager', 'contracts manager', 'strategic sourcing'] },
+  { id: 'planning-arc', title: 'Planning Arc', desc: 'Demand · Inventory · Materials', icon: <IconChart size={20} />, accent: '#b24020', picks: ['demand planning', 'inventory', 'materials management', 'supply planner', 'S&OP'] },
+  { id: 'freight-run', title: 'Freight Run', desc: 'Freight · Distribution · Warehouse', icon: <IconTruck size={20} />, accent: '#0e7490', picks: ['freight', 'distribution', 'warehouse', 'fulfillment'] },
+  { id: 'erp-craft', title: 'ERP Craft', desc: 'SAP · Oracle · Workday', icon: <IconPuzzle size={20} />, accent: '#1d4ed8', picks: ['erp', 'sap', 'oracle', 'workday', 'coupa', 'ariba'] },
 ]
 
 interface Profile {

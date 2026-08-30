@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { IconSearch, IconPlay, IconSave } from '../components/Icons'
 
 interface Location { id: string; label: string; query: string; remote: boolean; bonus: number }
 interface Board { id: string; label: string; enabled: boolean }
@@ -215,8 +216,8 @@ export default function SearchView({ onSave }: { onSave: (m: string) => void }) 
       </div>
 
       <div className="flex gap-md">
-        <button className="btn btn-primary" onClick={save}>Save Config</button>
-        <button className="btn btn-success" onClick={runNow}>▶ Run Discover Now</button>
+        <button className="btn btn-primary" onClick={save}><IconSave size={14} /> Save Config</button>
+        <button className="btn btn-success" onClick={runNow}><IconPlay size={14} /> Run Discover Now</button>
       </div>
     </div>
   )

@@ -1,20 +1,21 @@
 import LaziBot from './LaziBot'
+import { IconCouch, IconKey, IconSearch, IconPaperclip, IconPlay, IconChart, IconBarChart, IconKanban, IconChat, IconBell } from './Icons'
 
 type View = 'couch' | 'keys' | 'search' | 'attach' | 'run' | 'report' | 'analytics' | 'kanban' | 'qa' | 'notify'
 
 interface Props { view: View; onNav: (v: View) => void }
 
-const NAV_ITEMS: { id: View; label: string; icon: string; kicker?: string }[] = [
-  { id: 'couch',  label: 'The Couch',      icon: '🛋️', kicker: 'Command Center' },
-  { id: 'keys',   label: 'Keys & Models',  icon: '🔑' },
-  { id: 'search', label: 'Search',         icon: '🔍' },
-  { id: 'attach', label: 'Attachments',     icon: '📎' },
-  { id: 'run',    label: 'Run',            icon: '▶' },
-  { id: 'report', label: 'Report',         icon: '📊' },
-  { id: 'analytics', label: 'Analytics', icon: '📈' },
-  { id: 'kanban', label: 'Kanban',      icon: '🗂️' },
-  { id: 'qa',     label: 'Q&A Library', icon: '💬' },
-  { id: 'notify', label: 'Notifications', icon: '🔔' },
+const NAV_ITEMS: { id: View; label: string; icon: React.ReactNode; kicker?: string }[] = [
+  { id: 'couch',  label: 'The Couch',      icon: <IconCouch size={16} />, kicker: 'Command Center' },
+  { id: 'keys',   label: 'Keys & Models',  icon: <IconKey size={16} /> },
+  { id: 'search', label: 'Search',         icon: <IconSearch size={16} /> },
+  { id: 'attach', label: 'Attachments',     icon: <IconPaperclip size={16} /> },
+  { id: 'run',    label: 'Run',            icon: <IconPlay size={16} /> },
+  { id: 'report', label: 'Report',         icon: <IconChart size={16} /> },
+  { id: 'analytics', label: 'Analytics', icon: <IconBarChart size={16} /> },
+  { id: 'kanban', label: 'Kanban',      icon: <IconKanban size={16} /> },
+  { id: 'qa',     label: 'Q&A Library', icon: <IconChat size={16} /> },
+  { id: 'notify', label: 'Notifications', icon: <IconBell size={16} /> },
 ]
 
 export default function Nav({ view, onNav }: Props) {

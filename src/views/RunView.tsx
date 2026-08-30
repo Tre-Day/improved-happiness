@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { IconSearch, IconPlay, IconChart, IconSave, IconRefresh } from '../components/Icons'
 
 type RunStatus = 'idle' | 'running' | 'done' | 'error'
 
@@ -47,6 +48,13 @@ export default function RunView({ onSave }: { onSave: (m: string) => void }) {
         if (p.name) setProfiles(prev => prev.find(x=>x.id===active) ? prev : [...prev, { id: active, name: p.name as string }])
       } catch {}
     }).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    // stream live pipeline events headless — every py:log chunk bubbling from Electron main
+    window.jobbot.onLog((line: string) => {
+      setLogLines(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${line}`])
+    })
   }, [])
 
   useEffect(() => {
@@ -177,20 +185,20 @@ export default function RunView({ onSave }: { onSave: (m: string) => void }) {
         </div>
         <div className="flex gap-md" style={{ marginTop: 12 }}>
           <button className="btn btn-secondary" onClick={runDiscover} disabled={status === 'running'}>
-            🔍 Discover Only
+            <IconSearch size={14} /> Discover Only
           </button>
           <button className="btn btn-primary" onClick={runApply} disabled={status === 'running'}>
-            ▶ Apply Now
+            <IconPlay size={14} /> Apply Now
           </button>
           <button className="btn btn-success" onClick={openReport}>
-            📊 Open Report
+            <IconChart size={14} /> Open Report
           </button>
         </div>
       </div>
 
       {/* Scheduler — 10x feature 3 */}
       <div className="card">
-        <div className="card-header"><h2>⏰ Auto-Apply Scheduler</h2><span className={`badge ${scheduleEnabled ? 'badge-green' : 'badge-gray'}`}>{scheduleEnabled ? 'Enabled' : 'Off'}</span></div>
+        <div className="card-header"><h2>Auto-Apply Scheduler</h2><span className={`badge ${scheduleEnabled ? 'badge-green' : 'badge-gray'}`}>{scheduleEnabled ? 'Enabled' : 'Off'}</span></div>
         <div className="grid-2">
           <label className="checkbox-row"><input type="checkbox" checked={scheduleEnabled} onChange={e => setScheduleEnabled(e.target.checked)} /> Enable auto-run</label>
           <div className="field" style={{ margin: 0 }}>
@@ -209,7 +217,7 @@ export default function RunView({ onSave }: { onSave: (m: string) => void }) {
           // notify Electron to (re)schedule via node-cron — E2E headless
           try { await window.jobbot.pyRun('notify.py', []); } catch {}
           onSave(`Scheduler ${scheduleEnabled ? 'enabled' : 'disabled'} (${scheduleInterval})`);
-        }}>Save Schedule</button>
+        }}><IconSave size={14} /> Save Schedule</button>
         <div className="muted" style={{ fontSize: 11, marginTop: 6 }}>Uses <code>node-cron</code> in Electron + <code>config/schedule.yaml</code>. Headless, E2E via <code>python backend/notify.py</code> webhook test.</div>
       </div>
 

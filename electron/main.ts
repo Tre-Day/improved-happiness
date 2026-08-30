@@ -90,19 +90,31 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-// IPC: run a python script and return stdout
+// IPC: run a python script and return stdout — streams live logs to renderer for headless pipeline
 ipcMain.handle('py:run', async (_event, script: string, args: string[]) => {
   return new Promise((resolve) => {
     const pythonExe = getPythonExe()
     const fullScript = join(ROOT, 'backend', script)
     const proc = spawn(pythonExe, [fullScript, ...args], {
       cwd: join(ROOT, 'backend'),
-      env: { ...process.env, ROOT },
+      env: { ...process.env, ROOT, PYTHONUNBUFFERED: '1' },
       stdio: ['pipe', 'pipe', 'pipe']
     })
     let out = '', err = ''
-    proc.stdout?.on('data', (d) => { out += d.toString() })
-    proc.stderr?.on('data', (d) => { err += d.toString() })
+    const send = (chunk: Buffer, isErr: boolean) => {
+      const lines = chunk.toString().split('\n')
+      for (const line of lines) {
+        if (!line.trim()) continue
+        const payload = isErr ? `[py-err] ${line}` : line
+        out += isErr ? '' : line + '\n'
+        err += isErr ? line + '\n' : ''
+        // stream to renderer — headless pipeline events
+        mainWindow?.webContents.send('py:log', payload)
+        log.info(isErr ? '[py-err-stream]' : '[py-stream]', line.trim())
+      }
+    }
+    proc.stdout?.on('data', (d) => send(d, false))
+    proc.stderr?.on('data', (d) => send(d, true))
     proc.on('close', (code) => resolve({ code, out: out.trim(), err: err.trim() }))
     proc.on('error', (e) => resolve({ code: -1, out: '', err: String(e) }))
   })

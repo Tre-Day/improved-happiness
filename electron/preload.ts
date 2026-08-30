@@ -27,9 +27,10 @@ const api = {
   vaultEncrypt: (plaintext: string) => ipcRenderer.invoke('vault:encrypt', plaintext) as Promise<{ ok: boolean; data?: string; error?: string }>,
   vaultDecrypt: (b64: string) => ipcRenderer.invoke('vault:decrypt', b64) as Promise<{ ok: boolean; data?: string; error?: string }>,
 
-  // Event listeners
+  // Event listeners — streaming pipeline logs headless
   onLog: (cb: (line: string) => void) => {
     ipcRenderer.on('log', (_e, line) => cb(line))
+    ipcRenderer.on('py:log', (_e, line) => cb(line))
   }
 }
 
