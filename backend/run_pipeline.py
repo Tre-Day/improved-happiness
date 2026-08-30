@@ -25,7 +25,15 @@ SCORED_CSV = DATA / "tracker-scored.csv"
 logging.basicConfig(level=logging.INFO, format="[pipeline] %(levelname)s %(message)s")
 log = logging.getLogger(__name__)
 
-PY = str(ROOT / "venv" / "Scripts" / "python.exe")
+
+def _py() -> str:
+    cand = ROOT / "venv" / "Scripts" / "python.exe"
+    if cand.exists():
+        return str(cand)
+    return sys.executable
+
+
+PY = _py()
 
 
 def run_py(script: str, timeout: int = 300) -> tuple[int, str]:
@@ -35,7 +43,7 @@ def run_py(script: str, timeout: int = 300) -> tuple[int, str]:
     t0 = time.time()
     try:
         proc = subprocess.run(
-            [PY, str(path)],
+            [_py(), str(path)],
             cwd=str(ROOT / "backend"),
             capture_output=True,
             text=True,

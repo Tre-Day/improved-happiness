@@ -444,7 +444,7 @@ def run_headless(persona: str, max_apply: int, dry_run: bool) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description="JobBot Playwright headless apply")
     parser.add_argument("--headless", action="store_true")
-    parser.add_argument("--persona", default="Davenport")
+    parser.add_argument("--persona", default="default")
     parser.add_argument("--max", type=int, default=20)
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()

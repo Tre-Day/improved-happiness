@@ -127,17 +127,18 @@ def make_app() -> Any:
             f.write(line + "\n")
         return jsonify({"ok": True})
 
+    def _py() -> str:
+        cand = ROOT / "venv" / "Scripts" / "python.exe"
+        return str(cand) if cand.exists() else sys.executable
+
     # ── run pipeline ───────────────────────────────────────────────────────
     @app.route("/api/run/discover", methods=["POST"])
     def run_discover():
         import subprocess
 
-        venv_python = ROOT / "venv" / "Scripts" / "python.exe"
-        if not venv_python.exists():
-            return jsonify({"error": "venv not found"}), 500
         try:
             result = subprocess.run(
-                [str(venv_python), str(ROOT / "backend" / "run_pipeline.py"), "doall"],
+                [_py(), str(ROOT / "backend" / "run_pipeline.py"), "doall"],
                 cwd=str(ROOT / "backend"),
                 capture_output=True,
                 text=True,
@@ -156,13 +157,10 @@ def make_app() -> Any:
     def run_apply():
         import subprocess
 
-        venv_python = ROOT / "venv" / "Scripts" / "python.exe"
-        if not venv_python.exists():
-            return jsonify({"error": "venv not found"}), 500
         body = request.get_json() or {}
         args = [
             "--headless",
-            f"--persona={body.get('persona', 'Davenport')}",
+            f"--persona={body.get('persona', 'default')}",
             f"--max={body.get('max', 20)}",
         ]
         if body.get("dry_run"):
@@ -170,7 +168,7 @@ def make_app() -> Any:
         try:
             result = subprocess.run(
                 [
-                    str(venv_python),
+                    _py(),
                     str(ROOT / "backend" / "applier" / "playwright_runner.py"),
                     *args,
                 ],

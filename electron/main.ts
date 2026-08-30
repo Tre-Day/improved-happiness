@@ -51,11 +51,18 @@ function createWindow() {
   })
 }
 
+function getPythonExe(): string {
+  const venvPy = join(ROOT, 'venv', 'Scripts', 'python.exe')
+  if (fs.existsSync(venvPy)) return venvPy
+  // fallback to system python — for dev without venv (portable, not hardcoded to user)
+  return 'python'
+}
+
 function startPythonBackend() {
-  const pythonExe = join(ROOT, 'venv', 'Scripts', 'python.exe')
+  const pythonExe = getPythonExe()
   const script = join(ROOT, 'backend', 'api_server.py')
-  if (!fs.existsSync(pythonExe)) {
-    log.warn('venv not found at', pythonExe, '— python backend not started')
+  if (pythonExe === 'python' && !fs.existsSync(join(ROOT, 'backend', 'api_server.py'))) {
+    log.warn('python backend not found — skipping')
     return
   }
   pythonProc = spawn(pythonExe, [script], {
@@ -86,7 +93,7 @@ app.on('window-all-closed', () => {
 // IPC: run a python script and return stdout
 ipcMain.handle('py:run', async (_event, script: string, args: string[]) => {
   return new Promise((resolve) => {
-    const pythonExe = join(ROOT, 'venv', 'Scripts', 'python.exe')
+    const pythonExe = getPythonExe()
     const fullScript = join(ROOT, 'backend', script)
     const proc = spawn(pythonExe, [fullScript, ...args], {
       cwd: join(ROOT, 'backend'),

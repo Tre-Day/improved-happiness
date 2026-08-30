@@ -33,7 +33,7 @@ def normalize_url(url: str) -> str:
     if not url:
         return ""
     url = url.strip()
-    url = re.sub(TRACK_STRIP, r"\1", url, flags=re.IGNORECASE)
+    url = TRACK_STRIP.sub(r"\1", url)
     return url.rstrip("?&")
 
 
