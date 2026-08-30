@@ -7,8 +7,12 @@ import SearchView from './views/SearchView'
 import AttachView from './views/AttachView'
 import RunView from './views/RunView'
 import ReportView from './views/ReportView'
+import AnalyticsView from './views/AnalyticsView'
+import KanbanView from './views/KanbanView'
+import QALibraryView from './views/QALibraryView'
+import NotificationsView from './views/NotificationsView'
 
-type View = 'couch' | 'keys' | 'search' | 'attach' | 'run' | 'report'
+type View = 'couch' | 'keys' | 'search' | 'attach' | 'run' | 'report' | 'analytics' | 'kanban' | 'qa' | 'notify'
 
 export default function App() {
   const [view, setView] = useState<View>('couch')
@@ -47,6 +51,10 @@ export default function App() {
         {view === 'attach' && <AttachView onSave={showToast} />}
         {view === 'run'    && <RunView onSave={showToast} />}
         {view === 'report' && <ReportView onSave={showToast} />}
+        {view === 'analytics' && <AnalyticsView onSave={showToast} />}
+        {view === 'kanban' && <KanbanView onSave={showToast} />}
+        {view === 'qa' && <QALibraryView onSave={showToast} />}
+        {view === 'notify' && <NotificationsView onSave={showToast} />}
       </main>
 
       {/* ChatGPT-style bottom-fixed LaziBot overlay — on every page */}

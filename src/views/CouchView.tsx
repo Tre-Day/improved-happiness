@@ -135,6 +135,20 @@ export default function CouchView({ onGo }: CouchProps) {
   const activeProfile = profiles.find(p=>p.id===activeId) || profiles[0]
   const hasProfile = Boolean(activeProfile?.name)
 
+  const parseResume = async () => {
+    const paths = await window.jobbot.openFile([{ name: 'Resume', extensions: ['pdf', 'docx', 'txt'] }])
+    if (!paths.length) return
+    const res = await window.jobbot.pyRun('parser.py', [paths[0]])
+    try {
+      const data = JSON.parse(res.out)
+      if (data.name) setEditing(prev => prev ? { ...prev, name: data.name } : prev)
+      if (data.headline) setEditing(prev => prev ? { ...prev, headline: data.headline } : prev)
+      if (data.years_exp) setEditing(prev => prev ? { ...prev, years_exp: data.years_exp } : prev)
+      if (data.skills?.length) setEditing(prev => prev ? { ...prev, skills: Array.from(new Set([...(prev?.skills||[]), ...data.skills])) } as Profile : prev)
+      if (data.summary) setEditing(prev => prev ? { ...prev, summary: data.summary.slice(0, 600) } : prev)
+    } catch {}
+  }
+
   const saveProfile = async (p: Profile) => {
     const id = slugify(p.name) || p.id
     const yaml = toYaml({ ...p, id })
@@ -259,7 +273,9 @@ export default function CouchView({ onGo }: CouchProps) {
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12 }}>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 12, alignItems: 'center' }}>
+              <button className="btn btn-secondary btn-sm" onClick={parseResume}>📄 Parse Resume PDF → auto-fill</button>
+              <div style={{ flex: 1 }} />
               <button className="btn btn-secondary btn-sm" onClick={()=>setEditing(null)}>Cancel</button>
               <button className="btn btn-primary btn-sm" onClick={()=>saveProfile(editing)}>Save profile</button>
             </div>

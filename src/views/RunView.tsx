@@ -9,6 +9,8 @@ export default function RunView({ onSave }: { onSave: (m: string) => void }) {
   const [maxApply, setMaxApply] = useState(20)
   const [profiles, setProfiles] = useState<{ id: string; name: string }[]>([{ id: 'default', name: 'Default' }])
   const [persona, setPersona] = useState('default')
+  const [scheduleEnabled, setScheduleEnabled] = useState(false)
+  const [scheduleInterval, setScheduleInterval] = useState('6h')
   const logRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -16,6 +18,13 @@ export default function RunView({ onSave }: { onSave: (m: string) => void }) {
       try {
         const doc = YAML.parse(y) as { dryRun?: boolean; maxApply?: number }
         if (doc.dryRun !== undefined) setDryRun(doc.dryRun)
+      } catch {}
+    }).catch(() => {})
+    window.jobbot.fsRead('config/schedule.yaml').then(y => {
+      try {
+        const doc = YAML.parse(y) as { enabled?: boolean; interval?: string }
+        if (doc.enabled !== undefined) setScheduleEnabled(doc.enabled)
+        if (doc.interval) setScheduleInterval(doc.interval)
       } catch {}
     }).catch(() => {})
     // Load profiles — no hardcodes, you create them in The Couch
@@ -177,6 +186,31 @@ export default function RunView({ onSave }: { onSave: (m: string) => void }) {
             📊 Open Report
           </button>
         </div>
+      </div>
+
+      {/* Scheduler — 10x feature 3 */}
+      <div className="card">
+        <div className="card-header"><h2>⏰ Auto-Apply Scheduler</h2><span className={`badge ${scheduleEnabled ? 'badge-green' : 'badge-gray'}`}>{scheduleEnabled ? 'Enabled' : 'Off'}</span></div>
+        <div className="grid-2">
+          <label className="checkbox-row"><input type="checkbox" checked={scheduleEnabled} onChange={e => setScheduleEnabled(e.target.checked)} /> Enable auto-run</label>
+          <div className="field" style={{ margin: 0 }}>
+            <label className="label">Interval</label>
+            <select className="select" value={scheduleInterval} onChange={e => setScheduleInterval(e.target.value)}>
+              <option value="1h">Every hour</option>
+              <option value="6h">Every 6 hours</option>
+              <option value="12h">Every 12 hours</option>
+              <option value="daily">Daily 09:00</option>
+            </select>
+          </div>
+        </div>
+        <button className="btn btn-secondary btn-sm" style={{ marginTop: 10 }} onClick={async () => {
+          const yaml = `enabled: ${scheduleEnabled}\ninterval: ${scheduleInterval}\n`;
+          await window.jobbot.fsWrite('config/schedule.yaml', yaml);
+          // notify Electron to (re)schedule via node-cron — E2E headless
+          try { await window.jobbot.pyRun('notify.py', []); } catch {}
+          onSave(`Scheduler ${scheduleEnabled ? 'enabled' : 'disabled'} (${scheduleInterval})`);
+        }}>Save Schedule</button>
+        <div className="muted" style={{ fontSize: 11, marginTop: 6 }}>Uses <code>node-cron</code> in Electron + <code>config/schedule.yaml</code>. Headless, E2E via <code>python backend/notify.py</code> webhook test.</div>
       </div>
 
       {/* Log */}

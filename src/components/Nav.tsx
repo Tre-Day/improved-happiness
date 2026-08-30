@@ -1,6 +1,6 @@
 import LaziBot from './LaziBot'
 
-type View = 'couch' | 'keys' | 'search' | 'attach' | 'run' | 'report'
+type View = 'couch' | 'keys' | 'search' | 'attach' | 'run' | 'report' | 'analytics' | 'kanban' | 'qa' | 'notify'
 
 interface Props { view: View; onNav: (v: View) => void }
 
@@ -11,6 +11,10 @@ const NAV_ITEMS: { id: View; label: string; icon: string; kicker?: string }[] = 
   { id: 'attach', label: 'Attachments',     icon: '📎' },
   { id: 'run',    label: 'Run',            icon: '▶' },
   { id: 'report', label: 'Report',         icon: '📊' },
+  { id: 'analytics', label: 'Analytics', icon: '📈' },
+  { id: 'kanban', label: 'Kanban',      icon: '🗂️' },
+  { id: 'qa',     label: 'Q&A Library', icon: '💬' },
+  { id: 'notify', label: 'Notifications', icon: '🔔' },
 ]
 
 export default function Nav({ view, onNav }: Props) {
@@ -42,7 +46,23 @@ export default function Nav({ view, onNav }: Props) {
       ))}
 
       <div className="nav-section-label">Operate</div>
-      {NAV_ITEMS.slice(4).map(item => (
+      {NAV_ITEMS.slice(4, 6).map(item => (
+        <div key={item.id} className={`nav-item ${view === item.id ? 'active' : ''}`} onClick={() => onNav(item.id)}>
+          <span className="nav-icon">{item.icon}</span>
+          {item.label}
+        </div>
+      ))}
+
+      <div className="nav-section-label">Insights</div>
+      {NAV_ITEMS.slice(6, 8).map(item => (
+        <div key={item.id} className={`nav-item ${view === item.id ? 'active' : ''}`} onClick={() => onNav(item.id)}>
+          <span className="nav-icon">{item.icon}</span>
+          {item.label}
+        </div>
+      ))}
+
+      <div className="nav-section-label">Tools</div>
+      {NAV_ITEMS.slice(8).map(item => (
         <div key={item.id} className={`nav-item ${view === item.id ? 'active' : ''}`} onClick={() => onNav(item.id)}>
           <span className="nav-icon">{item.icon}</span>
           {item.label}

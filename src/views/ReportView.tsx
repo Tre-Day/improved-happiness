@@ -23,6 +23,8 @@ export default function ReportView({ onSave }: { onSave: (m: string) => void }) 
   const [log, setLog] = useState<LogEntry[]>([])
   const [filter, setFilter] = useState<'all' | 'applied' | 'failed' | 'queued'>('all')
   const [search, setSearch] = useState('')
+  const [boardFilter, setBoardFilter] = useState('all')
+  const [minScore, setMinScore] = useState(0)
   const [stats, setStats] = useState({ total: 0, applied: 0, failed: 0, queued: 0, scoreAvg: 0 })
 
   useEffect(() => {
@@ -60,16 +62,42 @@ export default function ReportView({ onSave }: { onSave: (m: string) => void }) 
     } catch {}
   }
 
+  const boards = Array.from(new Set(rows.map(r => r.Platform || r.Source || '?'))).filter(Boolean).sort()
+
+  const exportCsv = () => {
+    const headers = Object.keys(rows[0] || { 'Job Title': '', Company: '', score: '' })
+    const csv = [headers.join(','), ...filteredRows.map(r => headers.map(h => `"${((r as Record<string, string>)[h] || '').toString().replace(/"/g, '""')}"`).join(','))].join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href = url; a.download = 'tracker-export.csv'; a.click()
+    onSave(`Exported ${filteredRows.length} rows`)
+  }
+
+  const tailorRow = async (r: TrackerRow) => {
+    const url = r.URL || r.Link || ''
+    if (!url) return
+    const res = await window.jobbot.pyRun('tailor.py', ['--job-url', url])
+    onSave(res.code === 0 ? `Tailored ${url.slice(0, 30)}` : `Tailor failed: ${res.err.slice(0, 80)}`)
+  }
+
+  const coverRow = async (r: TrackerRow) => {
+    const url = r.URL || r.Link || ''
+    if (!url) return
+    const res = await window.jobbot.pyRun('cover.py', ['--job-url', url])
+    onSave(res.code === 0 ? `Cover for ${url.slice(0, 30)}` : `Cover failed: ${res.err.slice(0, 80)}`)
+  }
+
   const filteredRows = rows.filter(r => {
     const title = (r['Job Title'] || r.Title || '').toLowerCase()
     const company = (r.Company || '').toLowerCase()
-    const matches = !search || title.includes(search.toLowerCase()) || company.includes(search.toLowerCase())
+    const board = r.Platform || r.Source || '?'
+    const sc = parseInt(r.score || '0')
+    const matchesSearch = !search || title.includes(search.toLowerCase()) || company.includes(search.toLowerCase()) || board.toLowerCase().includes(search.toLowerCase())
+    const matchesBoard = boardFilter === 'all' || board === boardFilter
+    const matchesScore = sc >= minScore
     const status = r.apply_status || r.Status || ''
-    if (filter === 'all') return matches
-    if (filter === 'applied') return matches && status === 'applied'
-    if (filter === 'failed') return matches && ['failed','blocked','captcha'].includes(status)
-    if (filter === 'queued') return matches && (status === 'discovered' || status === 'queued')
-    return matches
+    const matchesFilter = filter === 'all' ? true : filter === 'applied' ? status === 'applied' : filter === 'failed' ? ['failed','blocked','captcha'].includes(status) : (status === 'discovered' || status === 'queued')
+    return matchesSearch && matchesBoard && matchesScore && matchesFilter
   })
 
   return (
@@ -89,8 +117,8 @@ export default function ReportView({ onSave }: { onSave: (m: string) => void }) 
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-md" style={{ marginBottom: 12 }}>
+      {/* Filters + Advanced */}
+      <div className="flex gap-md" style={{ marginBottom: 8, flexWrap: 'wrap' }}>
         {(['all','applied','failed','queued'] as const).map(f => (
           <button key={f} className={`btn btn-sm ${filter === f ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => setFilter(f)}>
@@ -100,10 +128,21 @@ export default function ReportView({ onSave }: { onSave: (m: string) => void }) 
             {f === 'queued'  && stats.queued > 0  && ` (${stats.queued})`}
           </button>
         ))}
-        <input className="input" style={{ flex: 1 }} placeholder="Search title or company..."
+        <select className="select" style={{ width: 140 }} value={boardFilter} onChange={e => setBoardFilter(e.target.value)}>
+          <option value="all">All boards</option>
+          {boards.map(b => <option key={b} value={b}>{b}</option>)}
+        </select>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span className="muted" style={{ fontSize: 11 }}>Min score</span>
+          <input type="range" className="slider" style={{ width: 90 }} min={0} max={100} value={minScore} onChange={e => setMinScore(parseInt(e.target.value))} />
+          <span style={{ fontSize: 11, color: 'var(--accent2)', minWidth: 24 }}>{minScore}</span>
+        </div>
+        <input className="input" style={{ flex: 1, minWidth: 160 }} placeholder="Search title/company/board..."
           value={search} onChange={e => setSearch(e.target.value)} />
         <button className="btn btn-secondary btn-sm" onClick={loadData}>Refresh</button>
+        <button className="btn btn-primary btn-sm" onClick={exportCsv}>Export CSV</button>
       </div>
+      <div className="muted" style={{ fontSize: 11, marginBottom: 10 }}>Advanced: board + score + global search — E2E headless via <code>pyRun(tailor/cover)</code> per row. Tailor/Cover generate in <code>data/tailored/</code> + <code>data/covers/</code>.</div>
 
       {/* Table */}
       <div className="table-wrap">
@@ -118,6 +157,7 @@ export default function ReportView({ onSave }: { onSave: (m: string) => void }) 
               <th>Status</th>
               <th>Applied At</th>
               <th>Reasons</th>
+              <th>AI</th>
             </tr>
           </thead>
           <tbody>
@@ -152,6 +192,12 @@ export default function ReportView({ onSave }: { onSave: (m: string) => void }) 
                   <td style={{ fontSize: 11, color: 'var(--text3)', maxWidth: 200,
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {r.reasons || ''}
+                  </td>
+                  <td>
+                    <div style={{ display: 'flex', gap: 4 }}>
+                      <button className="btn btn-secondary btn-sm" style={{ padding: '2px 6px', fontSize: 10 }} onClick={() => tailorRow(r)}>Tailor</button>
+                      <button className="btn btn-secondary btn-sm" style={{ padding: '2px 6px', fontSize: 10 }} onClick={() => coverRow(r)}>Cover</button>
+                    </div>
                   </td>
                 </tr>
               )

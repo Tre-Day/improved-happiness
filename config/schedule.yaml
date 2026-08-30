@@ -1,0 +1,4 @@
+enabled: false
+interval: 6h
+# Scheduler — node-cron in Electron, headless
+# enabled: true to auto-run discover+apply

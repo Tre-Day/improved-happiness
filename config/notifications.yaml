@@ -1,0 +1,4 @@
+webhooks:
+  # - url: "https://discord.com/api/webhooks/..."
+  #   label: "Discord"
+  #   enabled: true
